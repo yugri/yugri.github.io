@@ -1,60 +1,60 @@
 name: Auto-sync from Notion
 
 on:
-    schedule:
-        # Check for updates every 30 minutes during active hours (UTC)
-        - cron: "0,30 6-22 * * *" # Every 30 min from 6 AM to 10 PM UTC
-    workflow_dispatch: # Manual trigger
+  schedule:
+    # Check for updates every 30 minutes during active hours (UTC)
+    - cron: "0,30 6-22 * * *" # Every 30 min from 6 AM to 10 PM UTC
+  workflow_dispatch: # Manual trigger
 
 jobs:
-    notion-sync:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write # Needed to push changes
+  notion-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed to push changes
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  token: ${{ secrets.GITHUB_TOKEN }}
-                  fetch-depth: 0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "22"
-                  cache: "pnpm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
 
-            - name: Install dependencies
-              run: pnpm install
+      - name: Install dependencies
+        run: pnpm install
 
-            - name: Sync from Notion
-              run: pnpm run sync:notion
-              env:
-                  NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-                  NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      - name: Sync from Notion
+        run: pnpm run sync:notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
 
-            - name: Check for changes and commit
-              run: |
-                  # Set up git user first
-                  git config --local user.email "action@github.com"
-                  git config --local user.name "GitHub Action"
+      - name: Check for changes and commit
+        run: |
+          # Set up git user first
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
 
-                  # Add all blog content changes (new files, modified files, deleted files)
-                  git add src/content/post/
+          # Add all blog content changes (new files, modified files, deleted files)
+          git add src/content/post/
 
-                  # Check if there are any staged changes
-                  if ! git diff --cached --quiet; then
-                    echo "Changes detected in blog content:"
-                    git diff --cached --name-only src/content/post/
-                    
-                    # Commit and push
-                    git commit -m "Auto-sync: Update blog posts from Notion [skip ci]"
-                    git push origin main
-                    echo "Changes committed and pushed successfully"
-                  else
-                    echo "No changes detected in blog content"
-                  fi
+          # Check if there are any staged changes
+          if ! git diff --cached --quiet; then
+            echo "Changes detected in blog content:"
+            git diff --cached --name-only src/content/post/
+            
+            # Commit and push
+            git commit -m "Auto-sync: Update blog posts from Notion [skip ci]"
+            git push origin main
+            echo "Changes committed and pushed successfully"
+          else
+            echo "No changes detected in blog content"
+          fi
