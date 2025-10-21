@@ -7,6 +7,7 @@ import tailwind from "@tailwindcss/vite";
 import { defineConfig, envField } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
+import mermaid from "astro-mermaid";
 import robotsTxt from "astro-robots-txt";
 import webmanifest from "astro-webmanifest";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -30,11 +31,23 @@ export default defineConfig({
 		icon(),
 		sitemap(),
 		mdx(),
+		mermaid({
+			// Optional: Set a default theme
+			theme: 'forest',
+			// Optional: Enable automatic theme switching based on your site's data-theme
+			autoTheme: true,
+			// Optional: Additional mermaid configuration
+			mermaidConfig: {
+			  flowchart: {
+				curve: 'basis',
+			  },
+			},
+		}),
 		robotsTxt(),
 		webmanifest({
 			// See: https://github.com/alextim/astro-lib/blob/main/packages/astro-webmanifest/README.md
 			name: siteConfig.title,
-			short_name: "Astro_Cactus", // optional
+			short_name: "Yuri Grytsai", // optional
 			description: siteConfig.description,
 			lang: siteConfig.lang,
 			icon: "public/icon.svg", // the source for generating favicon & icons
@@ -97,6 +110,8 @@ export default defineConfig({
 			WEBMENTION_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
 			WEBMENTION_URL: envField.string({ context: "client", access: "public", optional: true }),
 			WEBMENTION_PINGBACK: envField.string({ context: "client", access: "public", optional: true }),
+			NOTION_TOKEN: envField.string({ context: "server", access: "secret", optional: true }),
+			NOTION_DATABASE_ID: envField.string({ context: "server", access: "secret", optional: true }),
 		},
 	},
 });
