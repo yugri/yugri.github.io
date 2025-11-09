@@ -7,45 +7,38 @@ import { collectionDateSort } from "@/utils/date";
 import type { GetStaticPaths, Page } from "astro";
 import { Icon } from "astro-icon/components";
 import { filterNotesByLang, getAllNotes } from "@/data/note";
-import { defaultLang } from "@/i18n/ui";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allNotes = await getAllNotes();
-	const localizedNotes = filterNotesByLang(allNotes, defaultLang);
-	return paginate(localizedNotes.sort(collectionDateSort), { pageSize: 10 });
+	const localizedNotes = filterNotesByLang(allNotes, "uk");
+	return paginate(localizedNotes.sort(collectionDateSort), {
+		pageSize: 10,
+		props: { hasLocalizedNotes: localizedNotes.length > 0 },
+	});
 }) satisfies GetStaticPaths;
 
 interface Props {
 	page: Page<CollectionEntry<"note">>;
+	hasLocalizedNotes: boolean;
 }
 
-const { page } = Astro.props as Props;
+const { page, hasLocalizedNotes } = Astro.props as Props;
+
+if (!hasLocalizedNotes) {
+	Astro.redirect("/notes/");
+}
 
 const meta = {
-	description: "Read my collection of notes",
-	title: "Notes",
-};
-
-const paginationProps = {
-	...(page.url.prev && {
-		prevUrl: {
-			text: "← Previous Page",
-			url: page.url.prev,
-		},
-	}),
-	...(page.url.next && {
-		nextUrl: {
-			text: "Next Page →",
-			url: page.url.next,
-		},
-	}),
+	description: "Добірка нотаток українською",
+	title: "Нотатки",
 };
 ---
 
 <PageLayout meta={meta}>
 	<section>
 		<h1 class="title mb-12 flex items-center gap-3">
-			Notes <a class="text-accent" href="/notes/rss.xml" target="_blank">
+			Нотатки{" "}
+			<a class="text-accent" href="/uk/notes/rss.xml" target="_blank">
 				<span class="sr-only">RSS feed</span>
 				<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name="mdi:rss" />
 			</a>
@@ -53,12 +46,15 @@ const paginationProps = {
 		<ul class="mt-6 space-y-8 text-start">
 			{
 				page.data.map((note) => (
-					<li class="">
+					<li>
 						<Note note={note} as="h2" isPreview />
 					</li>
 				))
 			}
 		</ul>
-		<Pagination {...paginationProps} />
+		<Pagination
+			prevUrl={page.url.prev && { text: "← Попередні нотатки", url: page.url.prev }}
+			nextUrl={page.url.next && { text: "Наступні нотатки →", url: page.url.next }}
+		/>
 	</section>
 </PageLayout>

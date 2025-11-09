@@ -1,10 +1,26 @@
 import { type CollectionEntry, getCollection } from "astro:content";
+import { defaultLang } from "@/i18n/ui";
+import type { Lang } from "@/i18n/utils";
 
 /** filter out draft posts based on the environment */
-export async function getAllPosts(): Promise<CollectionEntry<"post">[]> {
-	return await getCollection("post", ({ data }) => {
+export async function getAllPosts(lang?: Lang): Promise<CollectionEntry<"post">[]> {
+	const posts = await getCollection("post", ({ data }) => {
 		return import.meta.env.PROD ? !data.draft : true;
 	});
+
+	return lang ? filterPostsByLang(posts, lang) : posts;
+}
+
+export function filterPostsByLang(posts: CollectionEntry<"post">[], lang: Lang) {
+	return posts.filter((post) => (post.data.lang ?? defaultLang) === lang);
+}
+
+export async function getPostsByLang(lang: Lang) {
+	return getAllPosts(lang);
+}
+
+export function stripLangFromSlug(slug: string, lang: Lang) {
+	return slug.startsWith(`${lang}/`) ? slug.slice(lang.length + 1) : slug;
 }
 
 /** Get tag metadata by tag name */

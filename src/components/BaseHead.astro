@@ -70,8 +70,34 @@ const socialImageURL = new URL(ogImage ? ogImage : "/social-card.png", Astro.url
 <link href="/sitemap-index.xml" rel="sitemap" />
 
 {/* RSS auto-discovery */}
-<link href="/rss.xml" title="Blog" rel="alternate" type="application/rss+xml" />
-<link href="/notes/rss.xml" title="Notes" rel="alternate" type="application/rss+xml" />
+<link
+	href="/rss.xml"
+	title="Blog (English)"
+	rel="alternate"
+	type="application/rss+xml"
+	hreflang="en"
+/>
+<link
+	href="/notes/rss.xml"
+	title="Notes (English)"
+	rel="alternate"
+	type="application/rss+xml"
+	hreflang="en"
+/>
+<link
+	href="/uk/rss.xml"
+	title="Блог (українською)"
+	rel="alternate"
+	type="application/rss+xml"
+	hreflang="uk"
+/>
+<link
+	href="/uk/notes/rss.xml"
+	title="Нотатки (українською)"
+	rel="alternate"
+	type="application/rss+xml"
+	hreflang="uk"
+/>
 
 {/* Webmentions */}
 {

@@ -1,8 +1,29 @@
 ---
-import { menuLinks } from "@/site.config";
 import LanguagePicker from "../LanguagePicker.astro";
+import {
+  getLangFromUrl,
+  getRouteKeyFromPath,
+  useTranslatedPath,
+  useTranslations,
+} from "@/i18n/utils";
+import { defaultLang, ui } from "@/i18n/ui";
+import { menuLinks } from "@/site.config";
 
 const year = new Date().getFullYear();
+const currentLang = getLangFromUrl(Astro.url);
+const translateForLang = useTranslatedPath(currentLang);
+const t = useTranslations(currentLang);
+type TranslationKey = keyof (typeof ui)[typeof defaultLang];
+
+const navItems = menuLinks.map((link) => {
+  const routeKey = getRouteKeyFromPath(link.path) ?? "home";
+  const translationKey = `nav.${routeKey}` as TranslationKey;
+
+  return {
+    href: translateForLang(link.path),
+    label: t(translationKey),
+  };
+});
 ---
 
 <footer
@@ -19,12 +40,12 @@ const year = new Date().getFullYear();
   >
     <p id="footer_links" class="sr-only">More on this site</p>
     {
-      menuLinks.map((link) => (
+      navItems.map((item) => (
         <a
           class="hover:text-global-text px-4 py-2 hover:underline sm:py-0"
-          href={link.path}
+          href={item.href}
         >
-          {link.title}
+          {item.label}
         </a>
       ))
     }

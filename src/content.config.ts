@@ -11,10 +11,14 @@ const baseSchema = z.object({
 	title: titleSchema,
 });
 
+const SupportedLanguages = ["en", "uk"] as const;
+const LangSchema = z.enum(SupportedLanguages);
+
 const post = defineCollection({
 	loader: glob({ base: "./src/content/post", pattern: "**/*.{md,mdx}" }),
 	schema: ({ image }) =>
 		baseSchema.extend({
+			lang: LangSchema.default("en"),
 			description: z.string(),
 			coverImage: z
 				.object({
@@ -45,6 +49,7 @@ const note = defineCollection({
 			.string()
 			.datetime({ offset: true }) // Ensures ISO 8601 format with offsets allowed (e.g. "2024-01-01T00:00:00Z" and "2024-01-01T00:00:00+02:00")
 			.transform((val) => new Date(val)),
+		lang: LangSchema.default("en"),
 	}),
 });
 

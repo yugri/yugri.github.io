@@ -7,11 +7,10 @@ import PageLayout from "@/layouts/Base.astro";
 import { collectionDateSort } from "@/utils/date";
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 import { Icon } from "astro-icon/components";
-import { defaultLang } from "@/i18n/ui";
 import { getLangFromUrl, useTranslatedPath } from "@/i18n/utils";
 
 export const getStaticPaths = (async ({ paginate }) => {
-	const sortedPosts = (await getAllPosts()).sort(collectionDateSort);
+	const sortedPosts = (await getAllPosts("uk")).sort(collectionDateSort);
 	const uniqueTags = getUniqueTags(sortedPosts);
 
 	return uniqueTags.flatMap((tag) => {
@@ -27,12 +26,10 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { page } = Astro.props as Props;
 const { tag } = Astro.params;
-const tagMeta = await getTagMeta(tag);
 const currentLang = getLangFromUrl(Astro.url);
 const translateForLang = useTranslatedPath(currentLang);
-const englishPostsForTag = page.data.filter((p) => (p.data.lang ?? defaultLang) === defaultLang);
-const hasEnglishPosts = englishPostsForTag.length > 0;
 
+const tagMeta = await getTagMeta(tag);
 const TagContent = tagMeta ? (await render(tagMeta)).Content : null;
 
 const meta = {
@@ -43,13 +40,13 @@ const meta = {
 const paginationProps = {
 	...(page.url.prev && {
 		prevUrl: {
-			text: "← Previous Tags",
+			text: "← Попередні теги",
 			url: page.url.prev,
 		},
 	}),
 	...(page.url.next && {
 		nextUrl: {
-			text: "Next Tags →",
+			text: "Наступні теги →",
 			url: page.url.next,
 		},
 	}),
@@ -63,7 +60,9 @@ const paginationProps = {
 				<a class="text-accent" href={translateForLang("/tags/")}>Tags</a>
 				<Icon aria-hidden="true" name="mdi:chevron-right" class="mx-1.5" />
 			</li>
-			<li aria-current="page" class=""><span aria-hidden="true">#</span>{tag}</li>
+			<li aria-current="page">
+				<span aria-hidden="true">#</span>{tag}
+			</li>
 		</ul>
 	</nav>
 	<h1 class="title capitalize">{tagMeta?.data.title ?? `Posts about ${tag}`}</h1>
@@ -73,23 +72,11 @@ const paginationProps = {
 	</div>
 	<ul class="space-y-4">
 		{
-			hasEnglishPosts ? (
-				englishPostsForTag.map((p) => (
-					<li class="gap-1 sm:grid-cols-[auto_1fr] grid">
-						<PostPreview as="h2" post={p} />
-					</li>
-				))
-			) : (
-				<li>
-					<p>
-						No English posts with this tag yet.{" "}
-						<a class="cactus-link" href={translateForLang(`/tags/${tag}/`, "uk")}>
-							View Ukrainian posts instead
-						</a>
-						.
-					</p>
+			page.data.map((p) => (
+				<li class="gap-1 sm:grid-cols-[auto_1fr] grid">
+					<PostPreview as="h2" lang="uk" post={p} />
 				</li>
-			)
+			))
 		}
 	</ul>
 	<Pagination {...paginationProps} />

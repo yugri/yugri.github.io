@@ -1,38 +1,129 @@
 ---
-import { languages } from "../i18n/ui";
-import {
-  getLangFromUrl,
-  getRouteFromUrl,
-  useTranslatedPath,
-} from "../i18n/utils";
+import { defaultLang, languages, routes } from "../i18n/ui";
+import { getLangFromUrl, useTranslatedPath } from "../i18n/utils";
+
+type LanguageCode = keyof typeof languages;
 
 const currentLang = getLangFromUrl(Astro.url);
-const currentRoute = getRouteFromUrl(Astro.url);
-const basePath = currentRoute ? `/${currentRoute}` : "/";
+const currentPath = Astro.url.pathname || "/";
+
+const pickerOptions = Object.entries(languages).map(([lang, label]) => {
+  const translatePath = useTranslatedPath(lang as LanguageCode);
+  const href = translatePath(currentPath);
+
+  return {
+    href,
+    isActive: lang === currentLang,
+    label,
+    lang,
+  };
+});
+
+const hrefMap = Object.fromEntries(
+  pickerOptions.map(({ lang, href }) => [lang, href])
+) as Record<LanguageCode, string>;
 ---
 
 <nav
   class="language-toggle flex items-center rounded-full border border-accent/40 bg-global-bg/60 text-xs font-semibold backdrop-blur-sm"
+  data-hrefs={JSON.stringify(hrefMap)}
+  data-language-picker
+  data-current-lang={currentLang}
+  data-default-lang={defaultLang}
 >
   {
-    Object.entries(languages).map(([lang, label]) => {
-      const translatePath = useTranslatedPath(lang as keyof typeof languages);
-      const href = translatePath(basePath);
-      const isActive = lang === currentLang;
-
-      return (
-        <a
-          href={href}
-          class:list={{
-            "language-toggle__option px-3 py-1 first:rounded-s-full last:rounded-e-full transition": true,
-            "bg-accent text-global-bg": isActive,
-            "text-accent/80 hover:text-accent": !isActive,
-          }}
-          aria-current={isActive ? "true" : undefined}
-        >
-          {label}
-        </a>
-      );
-    })
+    pickerOptions.map(({ href, isActive, label, lang }) => (
+      <a
+        href={href}
+        class:list={{
+          "language-toggle__option px-3 py-1 first:rounded-s-full last:rounded-e-full transition": true,
+          "bg-accent text-global-bg": isActive,
+          "text-accent/80 hover:text-accent": !isActive,
+        }}
+        aria-current={isActive ? "true" : undefined}
+        data-lang={lang}
+      >
+        {label}
+      </a>
+    ))
   }
 </nav>
+
+<script is:inline>
+  (() => {
+    if (typeof window === "undefined") return;
+
+    const STORAGE_KEY = "yugri:lang";
+    const pickerEl = document.querySelector("[data-language-picker]");
+    if (!pickerEl) return;
+    const defaultLang = pickerEl.getAttribute("data-default-lang") ?? "en";
+    const currentLang =
+      pickerEl.getAttribute("data-current-lang") ?? defaultLang;
+    const hrefMap = (() => {
+      try {
+        const raw = pickerEl.getAttribute("data-hrefs");
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    })();
+
+    const safeStorage = {
+      get() {
+        try {
+          return window.localStorage.getItem(STORAGE_KEY);
+        } catch {
+          return null;
+        }
+      },
+      set(value) {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, value);
+        } catch {
+          // no-op if storage is unavailable
+        }
+      },
+    };
+
+    const normalizePath = (value: string) => {
+      if (!value) return "/";
+      if (value === "/") return value;
+      return value.endsWith("/") ? value.slice(0, -1) : value;
+    };
+
+    const redirectToPreferred = () => {
+      const preferredLang = safeStorage.get();
+      if (!preferredLang || preferredLang === currentLang) return;
+
+      const targetPath =
+        hrefMap && typeof hrefMap === "object"
+          ? hrefMap[preferredLang]
+          : undefined;
+      if (typeof targetPath !== "string") return;
+
+      const currentPath = normalizePath(window.location.pathname);
+      const desiredPath = normalizePath(targetPath);
+
+      if (currentPath === desiredPath) return;
+      window.location.replace(
+        `${targetPath}${window.location.search}${window.location.hash}`
+      );
+    };
+
+    pickerEl?.addEventListener("click", (event) => {
+      const eventTarget = event.target;
+      if (!(eventTarget instanceof Element)) return;
+      const target = eventTarget.closest("[data-lang]");
+      if (!target) return;
+      const lang = target.getAttribute("data-lang");
+      if (!lang) return;
+      safeStorage.set(lang);
+    });
+
+    if (currentLang !== defaultLang) {
+      safeStorage.set(currentLang);
+    } else {
+      redirectToPreferred();
+    }
+  })();
+</script>

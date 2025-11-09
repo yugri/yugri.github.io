@@ -2,13 +2,20 @@
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "@/components/FormattedDate.astro";
 import type { HTMLTag, Polymorphic } from "astro/types";
+import type { Lang } from "@/i18n/utils";
+import { defaultLang } from "@/i18n/ui";
+import { stripLangFromSlug } from "@/data/post";
 
 type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
 	post: CollectionEntry<"post">;
 	withDesc?: boolean;
+	lang?: Lang;
 };
 
-const { as: Tag = "div", post, withDesc = false } = Astro.props;
+const { as: Tag = "div", post, withDesc = false, lang = defaultLang } = Astro.props;
+const localizedSlug = stripLangFromSlug(post.id, post.data.lang ?? defaultLang);
+const localePrefix = lang === defaultLang ? "" : `/${lang}`;
+const postHref = `${localePrefix}/posts/${localizedSlug}/`;
 ---
 
 <FormattedDate
@@ -17,7 +24,7 @@ const { as: Tag = "div", post, withDesc = false } = Astro.props;
 />
 <Tag>
 	{post.data.draft && <span class="text-red-500">(Draft) </span>}
-	<a class="cactus-link" href={`/posts/${post.id}/`}>
+	<a class="cactus-link" href={postHref}>
 		{post.data.title}
 	</a>
 </Tag>

@@ -1,7 +1,6 @@
 ---
 import { getAllPosts, getUniqueTagsWithCount } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
-import { defaultLang } from "@/i18n/ui";
 import { getLangFromUrl, useTranslatedPath } from "@/i18n/utils";
 
 const currentLang = getLangFromUrl(Astro.url);
@@ -9,27 +8,24 @@ const translateForLang = useTranslatedPath(currentLang);
 const localizedPosts = await getAllPosts(currentLang);
 const allTags = getUniqueTagsWithCount(localizedPosts);
 
+
 const meta = {
-	description: "A list of all the topics I've written about in my posts",
-	title: "All Tags",
+	description: "Перелік доступних тегів українською",
+	title: "Усі теги",
 };
 ---
 
 <PageLayout meta={meta}>
-	<h1 class="title mb-6">Tags</h1>
+	<h1 class="title mb-6">Теги</h1>
 	<ul class="space-y-4">
 		{
 			allTags.map(([tag, val]) => (
 				<li class="flex items-center gap-x-2">
-					<a
-						class="cactus-link inline-block"
-						href={translateForLang(`/tags/${tag}/`)}
-						title={`View posts with the tag: ${tag}`}
-					>
+					<a class="cactus-link inline-block" href={translateForLang(`/tags/${tag}/`)} title={`View posts with the tag: ${tag}`}>
 						&#35;{tag}
 					</a>
 					<span class="inline-block">
-						- {val} Post{val > 1 && "s"}
+						- {val} пост{val > 1 && "ів"}
 					</span>
 				</li>
 			))

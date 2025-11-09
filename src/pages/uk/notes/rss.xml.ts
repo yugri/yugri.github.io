@@ -1,13 +1,12 @@
 import rss from "@astrojs/rss";
 import { siteConfig } from "@/site.config";
-import { defaultLang } from "@/i18n/ui";
 import { getNotesByLang } from "@/data/note";
 
 export const GET = async () => {
-	const notes = await getNotesByLang(defaultLang);
+	const notes = await getNotesByLang("uk");
 
 	return rss({
-		title: siteConfig.title,
+		title: `${siteConfig.title} — Нотатки (українською)`,
 		description: siteConfig.description,
 		site: import.meta.env.SITE,
 		items: notes.map((note) => ({

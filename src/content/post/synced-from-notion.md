@@ -2,6 +2,7 @@
 title: 'Synced from Notion'
 description: 'See if there is new article'
 publishDate: '2025-10-19'
+draft: true
 ---
 
 # Are you still struggling?

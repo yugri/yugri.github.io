@@ -3,19 +3,18 @@ import Note from "@/components/note/Note.astro";
 import PageLayout from "@/layouts/Base.astro";
 import type { InferGetStaticPropsType } from "astro";
 import { filterNotesByLang, getAllNotes } from "@/data/note";
-import { defaultLang } from "@/i18n/ui";
 import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (async () => {
 	const allNotes = await getAllNotes();
-	const localizedNotes = filterNotesByLang(allNotes, defaultLang);
+	const localizedNotes = filterNotesByLang(allNotes, "uk");
 	return localizedNotes.map((note) => ({
 		params: { slug: note.id },
 		props: { note },
 	}));
 }) satisfies GetStaticPaths;
 
-export type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { note } = Astro.props as Props;
 

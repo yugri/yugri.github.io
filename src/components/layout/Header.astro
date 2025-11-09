@@ -2,8 +2,34 @@
 import Search from "@/components/Search.astro";
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import LanguagePicker from "@/components/LanguagePicker.astro";
+import {
+  getLangFromUrl,
+  getRouteFromUrl,
+  getRouteKeyFromPath,
+  useTranslatedPath,
+  useTranslations,
+} from "@/i18n/utils";
+import { defaultLang, ui } from "@/i18n/ui";
 import { menuLinks } from "@/site.config";
 import { siteConfig } from "../../site.config";
+
+type TranslationKey = keyof typeof ui[typeof defaultLang];
+
+const currentLang = getLangFromUrl(Astro.url);
+const currentRoute = getRouteFromUrl(Astro.url);
+const translateForLang = useTranslatedPath(currentLang);
+const t = useTranslations(currentLang);
+
+const navItems = menuLinks.map((link) => {
+  const routeKey = getRouteKeyFromPath(link.path) ?? "home";
+  const translationKey = `nav.${routeKey}` as TranslationKey;
+
+  return {
+    href: translateForLang(link.path),
+    isActive: currentRoute === routeKey,
+    label: t(translationKey),
+  };
+});
 ---
 
 <header
@@ -12,9 +38,9 @@ import { siteConfig } from "../../site.config";
 >
   <div class="flex sm:flex-col">
     <a
-      aria-current={Astro.url.pathname === "/" ? "page" : false}
+      aria-current={currentRoute === "home" ? "page" : undefined}
       class="inline-flex items-center grayscale hover:filter-none sm:relative sm:inline-block"
-      href="/"
+      href={translateForLang("/")}
     >
       <svg
         aria-hidden="true"
@@ -44,13 +70,13 @@ import { siteConfig } from "../../site.config";
       id="navigation-menu"
     >
       {
-        menuLinks.map((link) => (
+        navItems.map((item) => (
           <a
-            aria-current={Astro.url.pathname === link.path ? "page" : false}
+            aria-current={item.isActive ? "page" : undefined}
             class="px-4 py-4 underline-offset-2 hover:underline sm:py-0"
-            href={link.path}
+            href={item.href}
           >
-            {link.title}
+            {item.label}
           </a>
         ))
       }

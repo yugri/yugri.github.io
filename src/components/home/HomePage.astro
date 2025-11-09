@@ -1,0 +1,113 @@
+---
+import SocialList from "@/components/SocialList.astro";
+import PostPreview from "@/components/blog/PostPreview.astro";
+import Note from "@/components/note/Note.astro";
+import PageLayout from "@/layouts/Base.astro";
+import { collectionDateSort } from "@/utils/date";
+import { getAllPosts } from "@/data/post";
+import { filterNotesByLang, getAllNotes } from "@/data/note";
+import {
+  getLangFromUrl,
+  useTranslatedPath,
+  useTranslations,
+} from "@/i18n/utils";
+import { defaultLang } from "@/i18n/ui";
+
+const pageLang = getLangFromUrl(Astro.url) ?? defaultLang;
+const translatePath = useTranslatedPath(pageLang);
+const t = useTranslations(pageLang);
+
+const MAX_POSTS = 10;
+const MAX_PINNED_POSTS = 3;
+const MAX_NOTES = 5;
+
+const localizedPosts = (await getAllPosts(pageLang)).sort(collectionDateSort);
+const postsForList = localizedPosts.slice(0, MAX_POSTS);
+const pinnedPosts = postsForList
+  .filter((p) => p.data.pinned)
+  .slice(0, MAX_PINNED_POSTS);
+
+const allNotes = await getAllNotes();
+const localizedNotes = filterNotesByLang(allNotes, pageLang)
+  .sort(collectionDateSort)
+  .slice(0, MAX_NOTES);
+
+const hasPinnedPosts = pinnedPosts.length > 0;
+const hasPosts = postsForList.length > 0;
+const hasNotes = localizedNotes.length > 0;
+
+const postsLink = translatePath("/posts/");
+const notesLink = translatePath("/notes/");
+
+const metaTitle = t("home.metaTitle");
+const heroHeading = t("home.heading");
+const introParagraphs = [t("home.intro.p1"), t("home.intro.p2")];
+const pinnedLabel = t("home.sections.pinned");
+const postsLabel = t("home.sections.posts");
+const notesLabel = t("home.sections.notes");
+---
+
+<PageLayout meta={{ title: metaTitle }}>
+  <section>
+    <h1 class="title mb-12">{heroHeading}</h1>
+    {
+      introParagraphs.map((paragraph, index) => (
+        <p
+          class:list={{
+            "mb-4": index < introParagraphs.length - 1,
+            "mb-6": index === introParagraphs.length - 1,
+          }}
+        >
+          {paragraph}
+        </p>
+      ))
+    }
+    <SocialList />
+  </section>
+  {
+    hasPinnedPosts && (
+      <section class="mt-16">
+        <h2 class="title mb-6 text-xl">{pinnedLabel}</h2>
+        <ul class="space-y-4" role="list">
+          {pinnedPosts.map((p) => (
+            <li class="grid gap-1 sm:grid-cols-[auto_1fr]">
+              <PostPreview lang={pageLang} post={p} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+  {
+    hasPosts && (
+      <section class="mt-16">
+        <h2 class="title text-accent mb-6 text-xl">
+          <a href={postsLink}>{postsLabel}</a>
+        </h2>
+        <ul class="space-y-4" role="list">
+          {postsForList.map((p) => (
+            <li class="grid gap-1 sm:grid-cols-[auto_1fr]">
+              <PostPreview lang={pageLang} post={p} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+  {
+    hasNotes && (
+      <section class="mt-16">
+        <h2 class="title text-accent mb-6 text-xl">
+          <a href={notesLink}>{notesLabel}</a>
+        </h2>
+        <ul class="space-y-6" role="list">
+          {localizedNotes.map((note) => (
+            <li>
+              <Note note={note} as="h3" isPreview />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</PageLayout>

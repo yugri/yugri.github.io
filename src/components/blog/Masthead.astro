@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "@/components/FormattedDate.astro";
+import { getLangFromUrl, useTranslatedPath } from "@/i18n/utils";
 
 interface Props {
 	content: CollectionEntry<"post">;
@@ -16,6 +17,8 @@ const {
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
 	month: "long",
 };
+const currentLang = getLangFromUrl(Astro.url);
+const translateForLang = useTranslatedPath(currentLang);
 ---
 
 {
@@ -74,7 +77,7 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 				<>
 					{/* prettier-ignore */}
 					<span class="contents">
-						<a class="cactus-link inline-block before:content-['#']" data-pagefind-filter={`tag:${tag}`} href={`/tags/${tag}/`}><span class="sr-only">View more blogs with the tag&nbsp;</span>{tag}
+						<a class="cactus-link inline-block before:content-['#']" data-pagefind-filter={`tag:${tag}`} href={translateForLang(`/tags/${tag}/`)}><span class="sr-only">View more blogs with the tag&nbsp;</span>{tag}
 						</a>{i < data.tags.length - 1 && ", "}
 					</span>
 				</>

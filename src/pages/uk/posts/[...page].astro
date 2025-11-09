@@ -1,0 +1,21 @@
+---
+import PostsIndex from "@/components/blog/PostsIndex.astro";
+import type { PostsPageProps } from "@/pages/posts/page-helpers";
+import { createPostsGetStaticPaths } from "@/pages/posts/page-helpers";
+
+export const getStaticPaths = createPostsGetStaticPaths("uk");
+
+const { page, uniqueTags, pinnedPosts, shouldRedirectToDefault, lang = "uk" } =
+	Astro.props as PostsPageProps;
+
+if (shouldRedirectToDefault) {
+	Astro.redirect("/posts/");
+}
+
+const meta = {
+	description: "Добірка дописів українською, коли вони доступні",
+	title: "Пости",
+};
+---
+
+<PostsIndex lang={lang} meta={meta} page={page} pinnedPosts={pinnedPosts} uniqueTags={uniqueTags} />
