@@ -2,8 +2,8 @@
 import type { PaginationLink } from "@/types";
 
 interface Props {
-	nextUrl?: PaginationLink;
-	prevUrl?: PaginationLink;
+	nextUrl?: PaginationLink | undefined;
+	prevUrl?: PaginationLink | undefined;
 }
 
 const { nextUrl, prevUrl } = Astro.props;

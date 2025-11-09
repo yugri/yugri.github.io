@@ -103,7 +103,7 @@ export default defineConfig({
 		optimizeDeps: {
 			exclude: ["@resvg/resvg-js"],
 		},
-		plugins: [tailwind(), rawFonts([".ttf", ".woff"])],
+		plugins: [tailwind(), rawFonts([".ttf", ".woff"])] as any,
 	},
 	env: {
 		schema: {
@@ -117,17 +117,21 @@ export default defineConfig({
 });
 
 function rawFonts(ext: string[]) {
+	const normalizedExt = ext.map((value) => (value.startsWith(".") ? value : `.${value}`));
+
 	return {
 		name: "vite-plugin-raw-fonts",
-		// @ts-expect-error:next-line
-		transform(_, id) {
-			if (ext.some((e) => id.endsWith(e))) {
-				const buffer = fs.readFileSync(id);
-				return {
-					code: `export default ${JSON.stringify(buffer)}`,
-					map: null,
-				};
+		enforce: "pre",
+		load(id: string) {
+			if (!normalizedExt.some((suffix) => id.endsWith(suffix))) {
+				return null;
 			}
+
+			const buffer = fs.readFileSync(id);
+			return {
+				code: `export default ${JSON.stringify(buffer)}`,
+				map: null,
+			};
 		},
 	};
 }

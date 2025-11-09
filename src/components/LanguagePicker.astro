@@ -1,5 +1,5 @@
 ---
-import { defaultLang, languages, routes } from "../i18n/ui";
+import { defaultLang, languages } from "../i18n/ui";
 import { getLangFromUrl, useTranslatedPath } from "../i18n/utils";
 
 type LanguageCode = keyof typeof languages;
@@ -49,7 +49,7 @@ const hrefMap = Object.fromEntries(
   }
 </nav>
 
-<script is:inline>
+<script is:inline lang="ts">
   (() => {
     if (typeof window === "undefined") return;
 
@@ -85,7 +85,7 @@ const hrefMap = Object.fromEntries(
       },
     };
 
-    const normalizePath = (value: string) => {
+    const normalizePath = (value) => {
       if (!value) return "/";
       if (value === "/") return value;
       return value.endsWith("/") ? value.slice(0, -1) : value;

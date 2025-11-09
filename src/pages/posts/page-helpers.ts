@@ -1,5 +1,5 @@
 import type { CollectionEntry } from "astro:content";
-import type { GetStaticPaths, Page } from "astro";
+import type { GetStaticPaths, GetStaticPathsOptions, Page } from "astro";
 import { getAllPosts, getUniqueTags, stripLangFromSlug } from "@/data/post";
 import { collectionDateSort } from "@/utils/date";
 import type { Lang } from "@/i18n/utils";
@@ -17,8 +17,8 @@ export type PostsPageProps = {
 	shouldRedirectToDefault?: boolean;
 };
 
-export function createPostsGetStaticPaths(lang: Lang): GetStaticPaths<PostsPageProps> {
-	return async ({ paginate }) => {
+export function createPostsGetStaticPaths(lang: Lang): GetStaticPaths {
+	return async ({ paginate }: GetStaticPathsOptions) => {
 		const localizedPosts = (await getAllPosts(lang)).sort(collectionDateSort);
 		const uniqueTags = getUniqueTags(localizedPosts).slice(0, MAX_TAGS);
 		const pinnedPosts = localizedPosts
@@ -41,12 +41,12 @@ export type PostDetailProps = {
 	post: CollectionEntry<"post">;
 };
 
-export function createPostDetailPaths(lang: Lang): GetStaticPaths<PostDetailProps> {
-	return (async () => {
+export function createPostDetailPaths(lang: Lang): GetStaticPaths {
+	return async () => {
 		const localizedPosts = await getAllPosts(lang);
 		return localizedPosts.map((post) => ({
 			params: { slug: stripLangFromSlug(post.id, post.data.lang ?? defaultLang) },
 			props: { post },
 		}));
-	}) satisfies GetStaticPaths;
+	};
 }

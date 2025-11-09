@@ -1,7 +1,6 @@
 ---
 import { getAllPosts, getUniqueTagsWithCount } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
-import { defaultLang } from "@/i18n/ui";
 import { getLangFromUrl, useTranslatedPath } from "@/i18n/utils";
 
 const currentLang = getLangFromUrl(Astro.url);

@@ -53,8 +53,16 @@ const meta = {
 			}
 		</ul>
 		<Pagination
-			prevUrl={page.url.prev && { text: "← Попередні нотатки", url: page.url.prev }}
-			nextUrl={page.url.next && { text: "Наступні нотатки →", url: page.url.next }}
+			prevUrl={
+				page.url.prev
+					? { text: "← Попередні нотатки", url: page.url.prev }
+					: undefined
+			}
+			nextUrl={
+				page.url.next
+					? { text: "Наступні нотатки →", url: page.url.next }
+					: undefined
+			}
 		/>
 	</section>
 </PageLayout>
