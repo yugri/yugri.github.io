@@ -1,5 +1,6 @@
 ---
-import { menuLinks, siteConfig } from "@/site.config";
+import { menuLinks } from "@/site.config";
+import LanguagePicker from "../LanguagePicker.astro";
 
 const year = new Date().getFullYear();
 ---
@@ -28,4 +29,5 @@ const year = new Date().getFullYear();
       ))
     }
   </nav>
+  <LanguagePicker />
 </footer>

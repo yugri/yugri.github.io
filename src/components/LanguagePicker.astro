@@ -1,0 +1,38 @@
+---
+import { languages } from "../i18n/ui";
+import {
+  getLangFromUrl,
+  getRouteFromUrl,
+  useTranslatedPath,
+} from "../i18n/utils";
+
+const currentLang = getLangFromUrl(Astro.url);
+const currentRoute = getRouteFromUrl(Astro.url);
+const basePath = currentRoute ? `/${currentRoute}` : "/";
+---
+
+<nav
+  class="language-toggle flex items-center rounded-full border border-accent/40 bg-global-bg/60 text-xs font-semibold backdrop-blur-sm"
+>
+  {
+    Object.entries(languages).map(([lang, label]) => {
+      const translatePath = useTranslatedPath(lang as keyof typeof languages);
+      const href = translatePath(basePath);
+      const isActive = lang === currentLang;
+
+      return (
+        <a
+          href={href}
+          class:list={{
+            "language-toggle__option px-3 py-1 first:rounded-s-full last:rounded-e-full transition": true,
+            "bg-accent text-global-bg": isActive,
+            "text-accent/80 hover:text-accent": !isActive,
+          }}
+          aria-current={isActive ? "true" : undefined}
+        >
+          {label}
+        </a>
+      );
+    })
+  }
+</nav>

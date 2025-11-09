@@ -1,0 +1,41 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+
+const meta = {
+  description:
+    "Про Юрія Грицая — Senior Software Engineer, спеціалізація: full‑stack розробка та віддалена робота",
+  title: "Про мене",
+};
+---
+
+<PageLayout meta={meta}>
+  <h1 class="title mb-12">Про мене</h1>
+  <div class="prose prose-sm prose-cactus max-w-none">
+    <p>
+      Привіт! Я Юрій Грицай, Senior Software Engineer з великим досвідом у
+      full‑stack розробці та віддаленій роботі.
+    </p>
+    <p>Моя спеціалізація:</p>
+    <ul class="list-inside list-disc" role="list">
+      <li>Сучасні вебтехнології та фреймворки</li>
+      <li>Full‑stack розробка</li>
+      <li>Співпраця у віддалених командах</li>
+      <li>Архітектура та проєктування систем</li>
+      <li>Оптимізація продуктивності</li>
+      <li>Автоматизоване тестування та CI/CD</li>
+    </ul>
+    <p>
+      Буду радий зв’‎язку <a
+        class="cactus-link inline-block"
+        href="mailto:yugritsai@gmail.com"
+        rel="noreferrer"
+        target="_blank">електронною поштою</a
+      > або підключайтеся в <a
+        class="cactus-link inline-block"
+        href="https://www.linkedin.com/in/yurigrytsai/"
+        rel="noreferrer"
+        target="_blank">LinkedIn</a
+      >!
+    </p>
+  </div>
+</PageLayout>
