@@ -66,30 +66,20 @@ jobs:
 
           git push origin "$branch"
 
-      - name: Create PR
+      - name: Create PR and enable auto-merge
         if: steps.diff.outputs.changed == 'true'
-        id: create_pr
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          branch: ${{ steps.commit_changes.outputs.branch }}
-          delete-branch: true
-          title: "Auto-sync: update blog posts from Notion"
-          body: |
-            Automated sync of published posts from Notion.
-
-            - Trigger: `${{ github.event_name }}`
-            - Run: `${{ github.run_id }}`
-
-            This PR was created automatically.
-          labels: auto-sync
-          add-paths: |
-            src/content/post/**
-
-      - name: Enable auto-merge
-        if: steps.diff.outputs.changed == 'true' && steps.create_pr.outputs.pull-request-number != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --repo "$GITHUB_REPOSITORY" --squash --auto
+          set -euo pipefail
+          branch="${{ steps.commit_changes.outputs.branch }}"
+          pr_number=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "Auto-sync: update blog posts from Notion" \
+            --body "Automated sync of published posts from Notion.\n\n- Trigger: \`${{ github.event_name }}\`\n- Run: \`${{ github.run_id }}\`\n\nThis PR was created automatically." \
+            --json number \
+            --jq '.number')
+
+          gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --squash --delete-branch --auto
