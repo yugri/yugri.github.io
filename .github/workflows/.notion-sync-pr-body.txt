@@ -1,0 +1,6 @@
+Automated sync of published posts from Notion.
+
+- Trigger: ${{ github.event_name }}
+- Run: ${{ github.run_id }}
+
+This PR was created automatically.
