@@ -37,24 +37,43 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
 
-      - name: Check for changes and commit
+      - name: Check for blog content changes
+        id: diff
         run: |
-          # Set up git user first
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          # Add all blog content changes (new files, modified files, deleted files)
-          git add src/content/post/
-
-          # Check if there are any staged changes
-          if ! git diff --cached --quiet; then
-            echo "Changes detected in blog content:"
-            git diff --cached --name-only src/content/post/
-            
-            # Commit and push
-            git commit -m "Auto-sync: Update blog posts from Notion [skip ci]"
-            git push origin main
-            echo "Changes committed and pushed successfully"
-          else
+          if git diff --quiet -- src/content/post/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No changes detected in blog content"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Changes detected in blog content"
+            git status --short src/content/post/
           fi
+
+      - name: Create pull request
+        if: steps.diff.outputs.changed == 'true'
+        id: create_pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Auto-sync: Update blog posts from Notion [skip ci]"
+          title: "Auto-sync: update blog posts from Notion"
+          body: |
+            Automated sync of published posts from Notion.
+
+            - Trigger: `${{ github.event_name }}`
+            - Run: `${{ github.run_id }}`
+
+            Please review and merge to publish the latest content.
+          branch: chore/notion-sync
+          branch-suffix: timestamp
+          labels: auto-sync
+          delete-branch: true
+          add-paths: |
+            src/content/post/**
+
+      - name: Enable auto-merge
+        if: steps.diff.outputs.changed == 'true' && steps.create_pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --repo "$GITHUB_REPOSITORY" --squash --auto
