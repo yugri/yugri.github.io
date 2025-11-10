@@ -49,6 +49,14 @@ jobs:
             git status --short src/content/post/
           fi
 
+      - name: Ensure auto-sync label
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create auto-sync --color FFD700 --description "Automated Notion sync" 2>/dev/null || \
+          gh label edit auto-sync --color FFD700 --description "Automated Notion sync"
+
       - name: Create pull request
         if: steps.diff.outputs.changed == 'true'
         id: create_pr
