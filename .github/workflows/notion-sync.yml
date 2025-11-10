@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Needed to push changes
+      pull-requests: write # Needed to open/auto-merge PRs
 
     steps:
       - name: Checkout repository
@@ -49,31 +50,45 @@ jobs:
             git status --short src/content/post/
           fi
 
-      - name: Create pull request
+      - name: Commit localized content changes
         if: steps.diff.outputs.changed == 'true'
-        id: create_pr
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Auto-sync: Update blog posts from Notion [skip ci]"
-          title: "Auto-sync: update blog posts from Notion"
-          body: |
-            Automated sync of published posts from Notion.
+        id: commit_changes
+        run: |
+          branch="chore/notion-sync-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
-            - Trigger: `${{ github.event_name }}`
-            - Run: `${{ github.run_id }}`
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
 
-            Please review and merge to publish the latest content.
-          branch: chore/notion-sync
-          branch-suffix: timestamp
-          delete-branch: true
-          add-paths: |
-            src/content/post/**
+          git checkout -b "$branch"
+          git add -A src/content/post/
+          git commit -m "Auto-sync: Update blog posts from Notion [skip ci]"
+          
+          git push origin "$branch"
 
-      - name: Enable auto-merge
-        if: steps.diff.outputs.changed == 'true' && steps.create_pr.outputs.pull-request-number != ''
+      - name: Create PR and enable auto-merge
+        if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr edit ${{ steps.create_pr.outputs.pull-request-number }} --repo "$GITHUB_REPOSITORY" --add-label "auto-sync"
-          gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --repo "$GITHUB_REPOSITORY" --squash --auto
+          branch="${{ steps.commit_changes.outputs.branch }}"
+          pr_number=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "Auto-sync: update blog posts from Notion" \
+            --body "Automated sync of published posts from Notion.\n\n- Trigger: \`${{ github.event_name }}\`\n- Run: \`${{ github.run_id }}\`\n\nThis PR was created automatically." \
+            --label "auto-sync" \
+            --json number \
+            --jq '.number' 2>/dev/null || true)
+
+          if [ -z "$pr_number" ]; then
+            pr_number=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$branch" --json number --jq '.[0].number')
+          fi
+
+          if [ -z "$pr_number" ]; then
+            echo "Unable to determine PR number for branch $branch" >&2
+            exit 1
+          fi
+
+          gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --squash --auto
