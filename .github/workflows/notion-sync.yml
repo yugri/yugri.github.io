@@ -79,8 +79,7 @@ jobs:
             --base main \
             --head "$branch" \
             --title "Auto-sync: update blog posts from Notion" \
-            --body-file .github/workflows/.notion-sync-pr-body.txt \
-            --label auto-sync || true
+            --body-file .github/workflows/.notion-sync-pr-body.txt || true
 
           pr_number=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --json number --jq '.[0].number')
 
