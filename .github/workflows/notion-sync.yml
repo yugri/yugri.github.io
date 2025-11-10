@@ -14,10 +14,18 @@ jobs:
       pull-requests: write # Needed to open/auto-merge PRs
 
     steps:
+      - name: Generate GitHub App token
+        id: app_auth
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.NOTION_SYNC_APP_ID }}
+          private-key: ${{ secrets.NOTION_SYNC_APP_PRIVATE_KEY }}
+          installation-id: ${{ secrets.NOTION_SYNC_APP_INSTALLATION_ID }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app_auth.outputs.token }}
           fetch-depth: 0
 
       - name: Install pnpm
@@ -69,7 +77,7 @@ jobs:
       - name: Create PR and enable auto-merge
         if: steps.diff.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app_auth.outputs.token }}
         run: |
           set -euo pipefail
           branch="${{ steps.commit_changes.outputs.branch }}"
