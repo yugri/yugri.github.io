@@ -49,14 +49,6 @@ jobs:
             git status --short src/content/post/
           fi
 
-      - name: Ensure auto-sync label
-        if: steps.diff.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh label create auto-sync --color FFD700 --description "Automated Notion sync" 2>/dev/null || \
-          gh label edit auto-sync --color FFD700 --description "Automated Notion sync"
-
       - name: Create pull request
         if: steps.diff.outputs.changed == 'true'
         id: create_pr
@@ -74,7 +66,6 @@ jobs:
             Please review and merge to publish the latest content.
           branch: chore/notion-sync
           branch-suffix: timestamp
-          labels: auto-sync
           delete-branch: true
           add-paths: |
             src/content/post/**
@@ -84,4 +75,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          gh pr edit ${{ steps.create_pr.outputs.pull-request-number }} --repo "$GITHUB_REPOSITORY" --add-label "auto-sync"
           gh pr merge ${{ steps.create_pr.outputs.pull-request-number }} --repo "$GITHUB_REPOSITORY" --squash --auto
