@@ -73,13 +73,16 @@ jobs:
         run: |
           set -euo pipefail
           branch="${{ steps.commit_changes.outputs.branch }}"
-          pr_number=$(gh pr create \
+          gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base main \
             --head "$branch" \
             --title "Auto-sync: update blog posts from Notion" \
             --body "Automated sync of published posts from Notion.\n\n- Trigger: \`${{ github.event_name }}\`\n- Run: \`${{ github.run_id }}\`\n\nThis PR was created automatically." \
-            --json number \
-            --jq '.number')
+            --label auto-sync \
+            --draft \
+            --fill-first)
+
+          pr_number=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --json number --jq '.[0].number')
 
           gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --squash --delete-branch --auto
