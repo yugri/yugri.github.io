@@ -181,11 +181,21 @@ async function getNotionPages() {
  */
 async function getPageBlocks(pageId) {
   try {
-    const response = await notion.blocks.children.list({
-      block_id: pageId,
-    });
+    const allBlocks = [];
+    let cursor = undefined;
 
-    return response.results;
+    do {
+      const response = await notion.blocks.children.list({
+        block_id: pageId,
+        start_cursor: cursor,
+        page_size: 100, // Maximum allowed by Notion API
+      });
+
+      allBlocks.push(...response.results);
+      cursor = response.next_cursor;
+    } while (cursor);
+
+    return allBlocks;
   } catch (error) {
     console.error('Error fetching page blocks:', error);
     return [];

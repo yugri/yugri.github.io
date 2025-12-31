@@ -5,6 +5,7 @@ publishDate: '2025-10-18'
 coverImage:
   src: 'http://www.majorgeeks.com/news/file/2728_search.jpg'
   alt: 'New article Alien'
+draft: true
 ---
 
 # Стаття про фільм Alien
