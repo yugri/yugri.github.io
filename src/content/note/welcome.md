@@ -1,9 +1,16 @@
 ---
-title: Hello, Welcome
-description: An introduction to using the note feature in Astro Cactus
-publishDate: "2024-10-14T11:23:00Z"
+title: First note
+description: Why I’m starting to write publicly again.
+publishDate: "2025-12-30T20:30:00Z"
 ---
 
-Hi, Hello. This is an example note feature included with Astro Cactus.
+I’ve been building things for years, but rarely writing about why or how I build them.
 
-They're for shorter, concise "post's" that you'd like to share, they generally don't include headings, but hey, that's entirely up to you.
+This site is my attempt to change that.
+
+Notes will be short. Sometimes technical, sometimes reflective.
+No polish, no SEO tricks — just thoughts worth saving and sharing.
+
+If something here helps you think clearer or build better, that’s already a win.
+
+More to come.
