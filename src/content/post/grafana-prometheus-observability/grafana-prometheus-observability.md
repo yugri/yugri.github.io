@@ -4,7 +4,7 @@ description: 'A hands-on walkthrough of observability using FastAPI, Prometheus,
 No Kubernetes. No SaaS. Just real metrics, real load, real alerts — and what they actually mean.'
 publishDate: '2025-12-30'
 coverImage:
-  src: 'https://drive.google.com/file/d/1A_Z1zinsBv5mLX2LHvVSzCcFJgbfTDhY/view?usp=sharing'
+  src: './grafana-dashboard-english.png'
   alt: 'Tiny Observability Stack: Grafana + Prometheus'
 lang: 'en'
 notionId: '2da627c3-8ae0-809d-b5ad-c1e1b1c2ffdd'
