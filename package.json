@@ -24,7 +24,7 @@
 		"@astrojs/sitemap": "3.5.1",
 		"@notionhq/client": "^5.3.0",
 		"@tailwindcss/vite": "4.1.13",
-		"astro": "5.13.7",
+		"astro": "5.17.3",
 		"astro-expressive-code": "^0.41.3",
 		"astro-icon": "^1.1.5",
 		"astro-mermaid": "^1.1.0",
