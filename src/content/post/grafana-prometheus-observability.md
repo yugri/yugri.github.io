@@ -3,9 +3,6 @@ title: 'Tiny Observability Stack: Grafana + Prometheus'
 description: 'A hands-on walkthrough of observability using FastAPI, Prometheus, and Grafana.
 No Kubernetes. No SaaS. Just real metrics, real load, real alerts — and what they actually mean.'
 publishDate: '2025-12-30'
-coverImage:
-  src: 'https://drive.google.com/file/d/1A_Z1zinsBv5mLX2LHvVSzCcFJgbfTDhY/view?usp=sharing'
-  alt: 'Tiny Observability Stack: Grafana + Prometheus'
 lang: 'en'
 notionId: '2da627c3-8ae0-809d-b5ad-c1e1b1c2ffdd'
 ---
@@ -187,3 +184,102 @@ python load_test.py --mode error --duration 20
 Watch:
 
 - error rate spike
+- success ratio collapse
+- alerts begin to **arm**
+### Burst Load
+
+```bash
+python load_test.py --mode burst --duration 10
+```
+
+```mermaid
+flowchart LR
+    Load[Load 🚀] -->|pressure| Latency[Latency ↑]
+    Latency -->|observe| Grafana[Grafana Panel]
+
+    style Load fill:#e3fafc
+    style Latency fill:#ffec99
+    style Grafana fill:#f1f3f5
+```
+
+Watch:
+
+- active connections jump
+- latency climb
+- dashboards tell a *story*
+This is where Grafana finally clicks.
+
+## Adding Your Own Metrics (Where Real Power Starts)
+
+Metrics are not magic.
+
+They’re **code you write on purpose**.
+
+### Example: custom business event
+
+```python
+from prometheus_clientimport Counter
+
+CUSTOM_EVENTS = Counter(
+"custom_events_total",
+"Meaningful business events",
+    ["type"]
+)
+```
+
+```python
+CUSTOM_EVENTS.labels(type="checkout").inc()
+```
+
+Now you can ask:
+
+That’s observability maturity.
+
+## Alerts That Don’t Cry Wolf
+
+```mermaid
+flowchart TD
+    U[Load Test / Users] --> A[FastAPI]
+    A -->|Latency / Errors| P[Prometheus]
+    P -->|Thresholds| AL[Alert Rules]
+    P -->|Queries| G[Grafana]
+    AL -->|Fire Alerts| G
+```
+
+A good alert is:
+
+- rare
+- actionable
+- boring most of the time
+Example:
+
+```yaml
+-alert:HighErrorRate
+expr:rate(http_errors_total[5m])>0.1
+for:2m
+labels:
+severity:warning
+```
+
+If this fires:
+
+- something *actually* broke
+- you didn’t get paged for noise
+- future-you says thank you
+## Final Thoughts
+
+Observability isn’t about dashboards.
+
+It’s about **confidence under pressure**.
+
+If you can answer these questions in under 30 seconds:
+
+- Is this user-visible?
+- Is it getting worse?
+- Where should I look next?
+Then you’re doing it right.
+
+This tiny stack helped me *actually understand* Grafana & Prometheus — not just configure them.
+
+If you’re learning observability, I strongly recommend building something like this yourself.
+
